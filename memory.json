@@ -1,0 +1,145 @@
+[
+  {
+    "id": "mem_001",
+    "trigger": "greeting",
+    "keywords": [
+      "hello",
+      "hi",
+      "hey",
+      "greetings",
+      "howdy"
+    ],
+    "response": "Hello. CUE is online and ready to process your commands.",
+    "type": "builtin",
+    "label": null,
+    "created_by": "system",
+    "created_at": "2026-04-01T00:00:00.000Z"
+  },
+  {
+    "id": "mem_002",
+    "trigger": "time",
+    "keywords": [
+      "time",
+      "what time",
+      "current time",
+      "clock",
+      "hour"
+    ],
+    "response": "auto:time",
+    "type": "builtin",
+    "label": null,
+    "created_by": "system",
+    "created_at": "2026-04-01T00:00:00.000Z"
+  },
+  {
+    "id": "mem_003",
+    "trigger": "date",
+    "keywords": [
+      "date",
+      "today",
+      "what day",
+      "current date",
+      "day is it"
+    ],
+    "response": "auto:date",
+    "type": "builtin",
+    "label": null,
+    "created_by": "system",
+    "created_at": "2026-04-01T00:00:00.000Z"
+  },
+  {
+    "id": "mem_004",
+    "trigger": "help",
+    "keywords": [
+      "help",
+      "commands",
+      "what can you do",
+      "guide",
+      "assist",
+      "capabilities"
+    ],
+    "response": "Available built-in commands: greeting, time, date, help, farewell, identity, version. You can also teach me new commands by sending any unrecognized input.",
+    "type": "builtin",
+    "label": null,
+    "created_by": "system",
+    "created_at": "2026-04-01T00:00:00.000Z"
+  },
+  {
+    "id": "mem_005",
+    "trigger": "farewell",
+    "keywords": [
+      "bye",
+      "goodbye",
+      "see you",
+      "later",
+      "farewell",
+      "exit"
+    ],
+    "response": "Session acknowledged. Until next time.",
+    "type": "builtin",
+    "label": null,
+    "created_by": "system",
+    "created_at": "2026-04-01T00:00:00.000Z"
+  },
+  {
+    "id": "mem_006",
+    "trigger": "identity",
+    "keywords": [
+      "who are you",
+      "what are you",
+      "your name",
+      "cue",
+      "introduce"
+    ],
+    "response": "I am CUE — Command Understanding Engine. A personal command-layer assistant that learns from you over time.",
+    "type": "builtin",
+    "label": null,
+    "created_by": "system",
+    "created_at": "2026-04-01T00:00:00.000Z"
+  },
+  {
+    "id": "mem_007",
+    "trigger": "version",
+    "keywords": [
+      "version",
+      "build",
+      "release",
+      "update"
+    ],
+    "response": "CUE v1.0.0 — Production build. File-based storage layer active.",
+    "type": "builtin",
+    "label": null,
+    "created_by": "system",
+    "created_at": "2026-04-01T00:00:00.000Z"
+  },
+  {
+    "id": "mem_008",
+    "trigger": "status",
+    "keywords": [
+      "status",
+      "health",
+      "ping",
+      "alive",
+      "running"
+    ],
+    "response": "auto:status",
+    "type": "builtin",
+    "label": null,
+    "created_by": "system",
+    "created_at": "2026-04-01T00:00:00.000Z"
+  },
+  {
+    "id": "mem_af486d36",
+    "trigger": "favourite",
+    "keywords": [
+      "favourite",
+      "fav",
+      "like"
+    ],
+    "response": "My favourite things are coding and mountains!",
+    "type": "custom",
+    "label": "user-added",
+    "created_by": "testuser",
+    "created_at": "2026-04-29T16:03:11.968Z"
+  }
+]

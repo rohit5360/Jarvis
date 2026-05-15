@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CUE — Create Account</title>
+  <link rel="stylesheet" href="/main.css">
+  <style>
+    body {
+      min-height: 100vh; display: flex; align-items: center; justify-content: center;
+      padding: 24px; background: var(--bg); position: relative; overflow: hidden;
+    }
+    body::before {
+      content: ''; position: fixed; inset: 0;
+      background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 40px 40px; opacity: 0.18; pointer-events: none;
+    }
+    .glow {
+      position: fixed; width: 640px; height: 640px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(56,189,248,0.045) 0%, transparent 65%);
+      top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none;
+    }
+    .container { position: relative; z-index: 1; width: 100%; max-width: 420px; animation: fadeUp 0.4s ease both; }
+    .logo { text-align: center; margin-bottom: 30px; }
+    .logo-mark {
+      width: 52px; height: 52px; border: 1px solid var(--border2); border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 12px; background: var(--surface); color: var(--cyan);
+    }
+    .logo-mark svg { width: 22px; height: 22px; }
+    .logo-title { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; color: var(--bright); letter-spacing: -1px; }
+    .logo-title span { color: var(--cyan); }
+    .logo-sub { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-2); margin-top: 7px; }
+    .auth-card {
+      background: var(--bg1); border: 1px solid var(--border); border-radius: var(--radius-xl);
+      padding: 28px; position: relative; overflow: hidden;
+    }
+    .auth-card::after {
+      content: ''; position: absolute; top: 0; left: 25%; right: 25%; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--cyan), transparent); opacity: 0.4;
+    }
+    .auth-heading { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; color: var(--bright); margin-bottom: 4px; }
+    .auth-sub     { font-size: 13px; color: var(--text-2); margin-bottom: 22px; }
+    .field + .field { margin-top: 15px; }
+    .pw-wrap { position: relative; }
+    .pw-toggle { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--muted); transition: var(--transition); padding: 4px; display: flex; align-items: center; }
+    .pw-toggle:hover { color: var(--text); }
+    .pw-toggle svg { width: 15px; height: 15px; }
+    #alertBox   { margin-bottom: 16px; }
+    #usernameOk { position: absolute; right: 11px; top: 50%; transform: translateY(-50%); display: none; }
+    #usernameOk svg { width: 14px; height: 14px; }
+    .link-row { text-align: center; margin-top: 18px; font-size: 13px; color: var(--text-2); }
+    .link-row a { color: var(--cyan); transition: var(--transition); }
+    .link-row a:hover { color: var(--bright); }
+    .optional { font-size: 10px; color: var(--muted); margin-left: 5px; letter-spacing: 0; text-transform: none; }
+    .strength-wrap { margin-top: 6px; }
+  </style>
+</head>
+<body>
+  <div class="glow"></div>
+
+  <div class="container">
+    <div class="logo">
+      <div class="logo-mark">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+      </div>
+      <div class="logo-title">C<span>UE</span></div>
+      <div class="logo-sub">Command Understanding Engine</div>
+    </div>
+
+    <div class="auth-card">
+      <div class="auth-heading">Create account</div>
+      <div class="auth-sub">Join CUE and build your command layer</div>
+
+      <div id="alertBox" class="alert"></div>
+
+      <div class="field">
+        <label for="username">Username</label>
+        <div class="input-wrap" style="position:relative">
+          <span class="input-icon" id="atIcon"></span>
+          <input id="username" type="text" class="input has-icon" style="padding-right:38px" placeholder="letters, numbers, _" autocomplete="username" />
+          <span id="usernameOk" class="text-success"></span>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="field">
+          <label for="age">Age <span class="optional">optional</span></label>
+          <div class="input-wrap">
+            <span class="input-icon" id="hashIcon"></span>
+            <input id="age" type="number" class="input has-icon" placeholder="22" min="1" max="120" />
+          </div>
+        </div>
+        <div class="field">
+          <label for="location">Location <span class="optional">optional</span></label>
+          <div class="input-wrap">
+            <span class="input-icon" id="locIcon"></span>
+            <input id="location" type="text" class="input has-icon" placeholder="city / country" />
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="password">Password</label>
+        <div class="pw-wrap input-wrap">
+          <span class="input-icon" id="lock1Icon"></span>
+          <input id="password" type="password" class="input has-icon" style="padding-right:42px" placeholder="at least 6 characters" autocomplete="new-password" />
+          <button class="pw-toggle" id="pwToggle1" type="button"></button>
+        </div>
+        <div class="strength-wrap">
+          <div class="strength-bars">
+            <div class="strength-bar" id="sb1"></div>
+            <div class="strength-bar" id="sb2"></div>
+            <div class="strength-bar" id="sb3"></div>
+            <div class="strength-bar" id="sb4"></div>
+          </div>
+          <div class="strength-label text-2" id="strengthLabel"></div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="confirm">Confirm Password</label>
+        <div class="pw-wrap input-wrap">
+          <span class="input-icon" id="lock2Icon"></span>
+          <input id="confirm" type="password" class="input has-icon" style="padding-right:42px" placeholder="repeat password" autocomplete="new-password" />
+          <button class="pw-toggle" id="pwToggle2" type="button"></button>
+        </div>
+      </div>
+
+      <button class="btn btn-primary btn-full mt-3" id="signupBtn" type="button">Create Account</button>
+    </div>
+
+    <div class="link-row">Already have an account? <a href="/login.html">Sign in</a></div>
+  </div>
+
+  <script src="/icons.js"></script>
+  <script src="/api.js"></script>
+  <script>
+    document.getElementById('atIcon').innerHTML    = Icons.at();
+    document.getElementById('hashIcon').innerHTML  = Icons.hash();
+    document.getElementById('locIcon').innerHTML   = Icons.location();
+    document.getElementById('lock1Icon').innerHTML = Icons.lock();
+    document.getElementById('lock2Icon').innerHTML = Icons.lock();
+    document.getElementById('pwToggle1').innerHTML = Icons.eye();
+    document.getElementById('pwToggle2').innerHTML = Icons.eye();
+    document.getElementById('usernameOk').innerHTML= Icons.check();
+
+    API.auth.me().then(me => { window.location.href = '/dashboard.html'; }).catch(()=>{});
+
+    // Password toggles
+    function makeToggle(inputId, btnId) {
+      let v = false;
+      const inp = document.getElementById(inputId);
+      const btn = document.getElementById(btnId);
+      btn.addEventListener('click', () => {
+        v = !v; inp.type = v ? 'text' : 'password';
+        btn.innerHTML = v ? Icons.eyeOff() : Icons.eye();
+      });
+    }
+    makeToggle('password', 'pwToggle1');
+    makeToggle('confirm',  'pwToggle2');
+
+    // Username check
+    let unTimer;
+    document.getElementById('username').addEventListener('input', function() {
+      clearTimeout(unTimer);
+      const ok = document.getElementById('usernameOk');
+      ok.style.display = 'none';
+      const val = this.value.trim();
+      if (val.length < 3) return;
+      unTimer = setTimeout(async () => {
+        try {
+          await API.post('/api/auth/login', { username: val, password: '__check__' });
+        } catch(e) {
+          if (e.message === 'Incorrect password.') { ok.style.display = 'flex'; ok.className = 'text-success'; }
+          else if (e.message === 'Username not found.') { ok.style.display = 'flex'; ok.style.color = 'var(--success)'; ok.innerHTML = Icons.check(); }
+        }
+      }, 400);
+    });
+
+    // Password strength
+    document.getElementById('password').addEventListener('input', function() {
+      const pw = this.value;
+      const bars = ['sb1','sb2','sb3','sb4'].map(id => document.getElementById(id));
+      const label = document.getElementById('strengthLabel');
+      let score = 0;
+      if (pw.length >= 6)  score++;
+      if (pw.length >= 10) score++;
+      if (/[A-Z]/.test(pw) && /[0-9]/.test(pw)) score++;
+      if (/[^A-Za-z0-9]/.test(pw)) score++;
+      const cls   = score <= 1 ? 'weak' : score <= 2 ? 'fair' : 'strong';
+      const texts = ['','Weak','Fair','Good','Strong'];
+      const colors= ['','var(--error)','var(--warning)','var(--success)','var(--success)'];
+      bars.forEach((b, i) => { b.className = 'strength-bar' + (i < score ? ' ' + cls : ''); });
+      label.textContent = pw ? texts[score] || 'Strong' : '';
+      label.style.color = colors[score] || '';
+    });
+
+    // Signup
+    const alertBox  = document.getElementById('alertBox');
+    const signupBtn = document.getElementById('signupBtn');
+
+    signupBtn.addEventListener('click', async () => {
+      clearAlert(alertBox);
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+      const confirm  = document.getElementById('confirm').value;
+      const age      = document.getElementById('age').value;
+      const location = document.getElementById('location').value.trim();
+
+      if (!username || !password || !confirm) { setAlert(alertBox, 'Username and password are required.'); return; }
+      if (password !== confirm) { setAlert(alertBox, 'Passwords do not match.'); return; }
+
+      setLoading(signupBtn, true);
+      try {
+        await API.auth.signup({ username, password, age: age || null, location });
+        window.location.href = '/dashboard.html';
+      } catch(e) {
+        setAlert(alertBox, e.message);
+        setLoading(signupBtn, false);
+      }
+    });
+
+    document.addEventListener('keydown', e => { if (e.key === 'Enter') signupBtn.click(); });
+  </script>
+</body>
+</html>

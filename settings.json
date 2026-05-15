@@ -1,0 +1,10 @@
+{
+  "app_name": "CUE",
+  "tagline": "Command Understanding Engine",
+  "version": "1.0.0",
+  "allow_registration": true,
+  "max_memory_entries": 500,
+  "max_log_entries": 1000,
+  "default_role": "user",
+  "created_at": "2026-04-01T00:00:00.000Z"
+}

@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CUE — Admin</title>
+  <link rel="stylesheet" href="/main.css">
+  <style>
+    html, body { height: 100%; overflow: hidden; }
+    body { display: flex; flex-direction: column; background: var(--bg); }
+
+    /* ── TOP BAR ── */
+    .topbar {
+      height: 56px; flex-shrink: 0;
+      background: rgba(10,12,16,0.92); backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; padding: 0 20px; gap: 14px;
+      position: relative; z-index: 20;
+    }
+    .topbar-logo { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 800; color: var(--bright); letter-spacing: -0.5px; }
+    .topbar-logo span { color: var(--accent-text); }
+    .topbar-badge { padding: 3px 9px; background: var(--error-dim); border: 1px solid rgba(248,113,113,.3); border-radius: var(--radius-full); font-size: 10px; color: var(--error); letter-spacing: 1.5px; text-transform: uppercase; font-weight: 600; }
+    .topbar-right { margin-left: auto; display: flex; gap: 10px; align-items: center; }
+    .topbar-user  { display: flex; align-items: center; gap: 8px; }
+    .topbar-username { font-size: 13px; color: var(--text); font-weight: 500; }
+
+    /* ── LAYOUT ── */
+    .app-body { flex: 1; display: flex; overflow: hidden; }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: 220px; flex-shrink: 0;
+      background: var(--bg1); border-right: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      padding: 16px 12px;
+      overflow-y: auto;
+    }
+    .sidebar-section { margin-bottom: 6px; }
+    .sidebar-label { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); padding: 0 8px; margin-bottom: 6px; margin-top: 14px; }
+    .sidebar-label:first-child { margin-top: 4px; }
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 10px; border-radius: var(--radius-sm);
+      font-size: 13px; color: var(--text-2); cursor: pointer;
+      transition: var(--transition); border: 1px solid transparent;
+      font-weight: 500;
+    }
+    .nav-item svg { width: 15px; height: 15px; flex-shrink: 0; }
+    .nav-item:hover { background: var(--surface); color: var(--text); }
+    .nav-item.active { background: var(--surface2); color: var(--bright); border-color: var(--border); }
+    .sidebar-footer { margin-top: auto; padding-top: 16px; border-top: 1px solid var(--border); }
+
+    /* ── MAIN CONTENT ── */
+    .main { flex: 1; overflow-y: auto; background: var(--bg); }
+    .main::-webkit-scrollbar { width: 5px; }
+    .main::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+    .page { padding: 28px; max-width: 1060px; }
+
+    .page-view { display: none; }
+    .page-view.active { display: block; animation: fadeIn 0.2s ease; }
+
+    .page-header { margin-bottom: 24px; }
+    .page-title { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; color: var(--bright); margin-bottom: 4px; }
+    .page-sub   { font-size: 13px; color: var(--text-2); }
+
+    /* Stats grid */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 28px; }
+
+    /* Section */
+    .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    .section-title  { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; color: var(--bright); }
+
+    /* User cell */
+    .user-cell { display: flex; align-items: center; gap: 10px; }
+    .user-cell-info { min-width: 0; }
+    .user-cell-name { font-size: 13px; color: var(--bright); font-weight: 500; line-height: 1.2; }
+    .user-cell-id   { font-size: 10px; color: var(--muted); margin-top: 2px; }
+    .user-detail    { font-size: 12px; color: var(--text-2); }
+
+    /* Keyword chips */
+    .kw-list { display: flex; flex-wrap: wrap; gap: 4px; }
+    .kw { padding: 2px 8px; background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; font-size: 10px; color: var(--muted); }
+
+    /* Log list */
+    .log-item { padding: 10px 0; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+    .log-item:last-child { border-bottom: none; }
+    .log-action { font-size: 12px; font-weight: 500; color: var(--text); }
+    .log-user   { font-size: 11px; color: var(--muted); }
+    .log-time   { font-size: 11px; color: var(--muted); margin-left: auto; white-space: nowrap; }
+    .log-dot    { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .log-dot.login  { background: var(--success); }
+    .log-dot.logout { background: var(--muted); }
+    .log-dot.cue_hit{ background: var(--accent); }
+    .log-dot.cue_miss{ background: var(--warning); }
+    .log-dot.signup { background: var(--cyan); }
+    .log-dot.admin  { background: var(--error); }
+    .log-dot.other  { background: var(--border2); }
+
+    /* Settings form */
+    .settings-grid { display: grid; gap: 16px; max-width: 500px; }
+    .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); }
+    .toggle-info h4 { font-size: 13px; color: var(--bright); font-weight: 500; margin-bottom: 3px; }
+    .toggle-info p  { font-size: 11px; color: var(--text-2); }
+    .toggle-switch  { position: relative; width: 40px; height: 22px; flex-shrink: 0; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; inset: 0; background: var(--border2); border-radius: 22px; cursor: pointer; transition: var(--transition); }
+    .slider::before { content: ''; position: absolute; width: 16px; height: 16px; left: 3px; top: 3px; background: var(--muted); border-radius: 50%; transition: var(--transition); }
+    input:checked + .slider { background: var(--accent); }
+    input:checked + .slider::before { transform: translateX(18px); background: #07090f; }
+
+    /* Modals */
+    .modal { background: var(--bg1); border: 1px solid var(--border2); border-radius: var(--radius-xl); width: 100%; max-width: 420px; padding: 24px; box-shadow: var(--shadow-lg); animation: slidePanel 0.22s ease; }
+    .modal-title { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 700; color: var(--bright); margin-bottom: 18px; }
+    .field + .field { margin-top: 14px; }
+
+    /* Select */
+    select.input { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7585' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 36px; }
+
+    /* Responsive */
+    @media(max-width:768px) {
+      .sidebar { width: 52px; padding: 12px 6px; }
+      .nav-item span, .sidebar-label, .topbar-username { display: none; }
+      .sidebar-footer { padding-top: 12px; }
+      .page { padding: 16px; }
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-logo">C<span>UE</span></div>
+    <div class="topbar-badge">Admin</div>
+    <div class="topbar-right">
+      <div class="topbar-user">
+        <div id="topAvatar" class="avatar avatar-xs"></div>
+        <span class="topbar-username" id="topUsername">—</span>
+      </div>
+      <a href="/dashboard.html" class="btn btn-ghost btn-sm" id="dashLink" style="text-decoration:none"></a>
+      <button class="btn btn-ghost btn-sm" id="logoutBtn"></button>
+    </div>
+  </div>
+
+  <!-- APP BODY -->
+  <div class="app-body">
+
+    <!-- SIDEBAR -->
+    <nav class="sidebar">
+      <div class="sidebar-label">Overview</div>
+      <div class="nav-item active" data-view="overview" onclick="switchView('overview', this)">
+        <span id="iconOverview"></span><span>Overview</span>
+      </div>
+
+      <div class="sidebar-label">Management</div>
+      <div class="nav-item" data-view="users" onclick="switchView('users', this)">
+        <span id="iconUsers"></span><span>Users</span>
+      </div>
+      <div class="nav-item" data-view="memory" onclick="switchView('memory', this)">
+        <span id="iconMemory"></span><span>Memory</span>
+      </div>
+
+      <div class="sidebar-label">System</div>
+      <div class="nav-item" data-view="logs" onclick="switchView('logs', this)">
+        <span id="iconLogs"></span><span>Activity Logs</span>
+      </div>
+      <div class="nav-item" data-view="settings" onclick="switchView('settings', this)">
+        <span id="iconSettings"></span><span>Settings</span>
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="nav-item" style="cursor:default; opacity:.5">
+          <span id="iconVersion"></span><span style="font-size:11px">v1.0.0</span>
+        </div>
+      </div>
+    </nav>
+
+    <!-- MAIN -->
+    <div class="main">
+      <div class="page">
+
+        <!-- ── OVERVIEW ── -->
+        <div class="page-view active" id="view-overview">
+          <div class="page-header">
+            <div class="page-title">Overview</div>
+            <div class="page-sub">CUE system snapshot</div>
+          </div>
+          <div class="stats-grid" id="statsGrid"></div>
+
+          <div class="section-header">
+            <div class="section-title">Recent Activity</div>
+            <button class="btn btn-ghost btn-sm" onclick="switchView('logs', document.querySelector('[data-view=logs]'))">View all</button>
+          </div>
+          <div class="table-container">
+            <div id="recentLogs" style="padding:0 16px"></div>
+          </div>
+        </div>
+
+        <!-- ── USERS ── -->
+        <div class="page-view" id="view-users">
+          <div class="page-header">
+            <div class="page-title">Users</div>
+            <div class="page-sub">Manage all registered accounts</div>
+          </div>
+          <div class="section-header">
+            <div class="section-title" id="usersCount">—</div>
+            <button class="btn btn-primary btn-sm" onclick="openAddUser()" id="addUserBtn"></button>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>User</th>
+                  <th>Role</th>
+                  <th>Joined</th>
+                  <th class="hide-sm">Details</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="usersTable"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ── MEMORY ── -->
+        <div class="page-view" id="view-memory">
+          <div class="page-header">
+            <div class="page-title">Memory</div>
+            <div class="page-sub">CUE command database — keywords and responses</div>
+          </div>
+          <div class="section-header">
+            <div class="section-title" id="memCount">—</div>
+            <button class="btn btn-primary btn-sm" onclick="openAddCmd()" id="addCmdBtn"></button>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Trigger</th>
+                  <th>Keywords</th>
+                  <th class="hide-sm">Response</th>
+                  <th>Type</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="memTable"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ── LOGS ── -->
+        <div class="page-view" id="view-logs">
+          <div class="page-header">
+            <div class="page-title">Activity Logs</div>
+            <div class="page-sub">Chronological audit trail of all system events</div>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr><th>Event</th><th>User</th><th>Detail</th><th>Time</th></tr>
+              </thead>
+              <tbody id="logsTable"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ── SETTINGS ── -->
+        <div class="page-view" id="view-settings">
+          <div class="page-header">
+            <div class="page-title">System Settings</div>
+            <div class="page-sub">Global CUE configuration</div>
+          </div>
+          <div class="settings-grid" id="settingsForm"></div>
+          <div class="mt-3">
+            <button class="btn btn-primary" id="saveSettingsBtn">Save Settings</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ── ADD USER MODAL ── -->
+  <div class="overlay" id="addUserOverlay">
+    <div class="modal">
+      <div class="modal-title">Add User</div>
+      <div class="field">
+        <label for="newU">Username</label>
+        <input type="text" id="newU" class="input" placeholder="username" />
+      </div>
+      <div class="field">
+        <label for="newP">Password</label>
+        <input type="password" id="newP" class="input" placeholder="min. 6 characters" />
+      </div>
+      <div class="field">
+        <label for="newR">Role</label>
+        <select id="newR" class="input">
+          <option value="user">User</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+      <div id="addUserAlert" class="alert mt-2"></div>
+      <div class="flex gap-2 mt-3">
+        <button class="btn btn-primary" id="addUserSubmit">Create</button>
+        <button class="btn btn-ghost" onclick="document.getElementById('addUserOverlay').classList.remove('open')">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── ADD COMMAND MODAL ── -->
+  <div class="overlay" id="addCmdOverlay">
+    <div class="modal">
+      <div class="modal-title">Add Memory Command</div>
+      <div class="field">
+        <label for="cTrigger">Trigger name</label>
+        <input type="text" id="cTrigger" class="input" placeholder="e.g. weather" />
+      </div>
+      <div class="field">
+        <label for="cKeywords">Keywords <span style="text-transform:none;letter-spacing:0;font-size:10px;color:var(--muted)">(comma-separated)</span></label>
+        <input type="text" id="cKeywords" class="input" placeholder="weather, forecast, rain" />
+      </div>
+      <div class="field">
+        <label for="cResponse">Response</label>
+        <textarea id="cResponse" class="input" placeholder="Response text, or: auto:time / auto:date / auto:status" style="min-height:72px"></textarea>
+      </div>
+      <div class="field">
+        <label for="cType">Type</label>
+        <select id="cType" class="input">
+          <option value="custom">custom</option>
+          <option value="builtin">builtin</option>
+        </select>
+      </div>
+      <div id="addCmdAlert" class="alert mt-2"></div>
+      <div class="flex gap-2 mt-3">
+        <button class="btn btn-primary" id="addCmdSubmit">Save Command</button>
+        <button class="btn btn-ghost" onclick="document.getElementById('addCmdOverlay').classList.remove('open')">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script src=" /icons.js"></script>
+  <script src=" /api.js"></script>
+  <script>
+    let me = null;
+    const COLORS = ['#e8a020','#38bdf8','#a78bfa','#2dd4a0','#f87171','#60a5fa','#fb923c'];
+
+    async function init() {
+      me = await guardAuth(true);
+      if (!me) return;
+      renderIcons();
+      renderTopbar();
+      loadOverview();
+      loadUsers();
+      loadMemory();
+      loadLogs();
+      loadSettings();
+    }
+
+    function renderIcons() {
+      document.getElementById('iconOverview').innerHTML = Icons.activity();
+      document.getElementById('iconUsers').innerHTML    = Icons.users();
+      document.getElementById('iconMemory').innerHTML   = Icons.brain();
+      document.getElementById('iconLogs').innerHTML     = Icons.list();
+      document.getElementById('iconSettings').innerHTML = Icons.cog();
+      document.getElementById('iconVersion').innerHTML  = Icons.zap();
+      document.getElementById('addUserBtn').innerHTML   = Icons.plus() + ' Add User';
+      document.getElementById('addCmdBtn').innerHTML    = Icons.plus() + ' Add Command';
+      document.getElementById('dashLink').innerHTML     = Icons.chevLeft() + ' Dashboard';
+      document.getElementById('logoutBtn').innerHTML    = Icons.logout() + ' Sign out';
+    }
+
+    function renderTopbar() {
+      API.profile.get().then(p => {
+        const av = document.getElementById('topAvatar');
+        av.style.background = p.theme_color || '#e8a020';
+        av.textContent = me.username[0].toUpperCase();
+      }).catch(()=>{});
+      document.getElementById('topUsername').textContent = me.username;
+    }
+
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      await API.auth.logout().catch(()=>{});
+      window.location.href = '/login.html';
+    });
+
+    // ── VIEW SWITCHING ──
+    function switchView(name, el) {
+      document.querySelectorAll('.page-view').forEach(v => v.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      document.getElementById('view-' + name).classList.add('active');
+      el.classList.add('active');
+    }
+
+    // ── OVERVIEW ──
+    async function loadOverview() {
+      try {
+        const stats = await API.admin.stats();
+        const upH = Math.floor(stats.uptime_seconds/3600);
+        const upM = Math.floor((stats.uptime_seconds%3600)/60);
+        document.getElementById('statsGrid').innerHTML = [
+          { label: 'Total Users',    value: stats.users,          color: 'var(--accent-text)' },
+          { label: 'Admins',         value: stats.admins,         color: 'var(--cyan)' },
+          { label: 'Memory Total',   value: stats.memory_total,   color: 'var(--bright)' },
+          { label: 'Custom Commands',value: stats.memory_custom,   color: '#c4b5fd' },
+          { label: 'Log Entries',    value: stats.log_entries,    color: 'var(--text)' },
+          { label: 'Uptime',         value: `${upH}h ${upM}m`,   color: 'var(--success)' },
+        ].map(s => `<div class="stat-card">
+          <div class="stat-label">${s.label}</div>
+          <div class="stat-value" style="color:${s.color}">${s.value}</div>
+        </div>`).join('');
+
+        const logs = await API.admin.logs(10);
+        const recentEl = document.getElementById('recentLogs');
+        recentEl.innerHTML = logs.slice(0,8).map(l => renderLogItem(l)).join('') || '<div style="padding:20px 0;text-align:center;color:var(--muted);font-size:13px">No activity yet</div>';
+      } catch(e) { console.error(e); }
+    }
+
+    function logDotClass(action) {
+      if (action.startsWith('login'))  return 'login';
+      if (action.startsWith('logout')) return 'logout';
+      if (action === 'signup')         return 'signup';
+      if (action === 'cue_hit')        return 'cue_hit';
+      if (action === 'cue_miss')       return 'cue_miss';
+      if (action.startsWith('admin'))  return 'admin';
+      return 'other';
+    }
+
+    function renderLogItem(l) {
+      return `<div class="log-item">
+        <div class="log-dot ${logDotClass(l.action)}"></div>
+        <div>
+          <div class="log-action">${l.action.replace(/_/g,' ')}</div>
+          <div class="log-user">${l.username}${l.detail ? ' · ' + l.detail : ''}</div>
+        </div>
+        <div class="log-time">${formatTime(l.timestamp)}</div>
+      </div>`;
+    }
+
+    // ── USERS ──
+    async function loadUsers() {
+      try {
+        const users = await API.admin.users();
+        document.getElementById('usersCount').textContent = `${users.length} account${users.length!==1?'s':''}`;
+        const tbody = document.getElementById('usersTable');
+        tbody.innerHTML = users.map(u => {
+          const p   = u.profile || {};
+          const col = p.theme_color || COLORS[0];
+          const isSelf = u.id === me.id;
+          return `<tr>
+            <td>
+              <div class="user-cell">
+                <div class="avatar avatar-sm" style="background:${col}">${u.username[0].toUpperCase()}</div>
+                <div class="user-cell-info">
+                  <div class="user-cell-name">${p.display_name || u.username}</div>
+                  <div class="user-cell-id">${u.id}</div>
+                </div>
+              </div>
+            </td>
+            <td><span class="badge badge-${u.role}">${u.role}</span></td>
+            <td>${formatDate(u.created_at)}</td>
+            <td class="hide-sm user-detail">${p.age ? p.age + ' y/o' : '—'} &middot; ${p.location || 'unknown'}</td>
+            <td>
+              <div class="flex gap-2">
+                ${!isSelf ? `
+                  <button class="btn btn-ghost btn-sm" onclick="toggleRole('${u.id}', '${u.role}')">
+                    ${u.role==='admin'?'Make user':'Make admin'}
+                  </button>
+                  <button class="btn btn-danger btn-sm" onclick="deleteUser('${u.id}','${u.username}')">Delete</button>
+                ` : '<span style="font-size:11px;color:var(--muted)">You</span>'}
+              </div>
+            </td>
+          </tr>`;
+        }).join('') || `<tr><td colspan="5" style="text-align:center;padding:30px;color:var(--muted)">No users</td></tr>`;
+      } catch(e) { console.error(e); }
+    }
+
+    async function toggleRole(id, current) {
+      const newRole = current === 'admin' ? 'user' : 'admin';
+      if (!confirm(`Change role to "${newRole}"?`)) return;
+      try {
+        await API.admin.changeRole(id, newRole);
+        showToast(`Role updated to ${newRole}.`);
+        loadUsers(); loadOverview();
+      } catch(e) { showToast(e.message, 'error'); }
+    }
+
+    async function deleteUser(id, username) {
+      if (!confirm(`Delete user "${username}"? This cannot be undone.`)) return;
+      try {
+        await API.admin.deleteUser(id);
+        showToast(`User "${username}" deleted.`);
+        loadUsers(); loadOverview();
+      } catch(e) { showToast(e.message, 'error'); }
+    }
+
+    // Add user
+    document.getElementById('addUserSubmit').addEventListener('click', async () => {
+      const username = document.getElementById('newU').value.trim();
+      const password = document.getElementById('newP').value;
+      const role     = document.getElementById('newR').value;
+      const alertEl  = document.getElementById('addUserAlert');
+      clearAlert(alertEl);
+      if (!username || !password) { setAlert(alertEl, 'Username and password required.'); return; }
+      try {
+        await API.admin.addUser({ username, password, role });
+        document.getElementById('addUserOverlay').classList.remove('open');
+        showToast(`User "${username}" created.`);
+        loadUsers(); loadOverview();
+      } catch(e) { setAlert(alertEl, e.message); }
+    });
+
+    function openAddUser() {
+      document.getElementById('newU').value = '';
+      document.getElementById('newP').value = '';
+      document.getElementById('newR').value = 'user';
+      clearAlert(document.getElementById('addUserAlert'));
+      document.getElementById('addUserOverlay').classList.add('open');
+    }
+
+    // ── MEMORY ──
+    async function loadMemory() {
+      try {
+        const memory = await API.memory.getAll();
+        document.getElementById('memCount').textContent = `${memory.length} command${memory.length!==1?'s':''}`;
+        const tbody = document.getElementById('memTable');
+        tbody.innerHTML = memory.map(m => `<tr>
+          <td style="color:var(--bright);font-weight:500">${m.trigger}</td>
+          <td>
+            <div class="kw-list">
+              ${(m.keywords||[]).slice(0,4).map(k=>`<span class="kw">${k}</span>`).join('')}
+              ${m.keywords.length>4?`<span class="kw">+${m.keywords.length-4}</span>`:''}
+            </div>
+          </td>
+          <td class="hide-sm" style="max-width:180px"><div class="truncate text-muted" style="font-size:12px" title="${m.response}">${m.response}</div></td>
+          <td>
+            <span class="badge badge-${m.type}">${m.type}</span>
+            ${m.label?`<span class="badge badge-success" style="margin-left:4px;font-size:9px">${m.label}</span>`:''}
+          </td>
+          <td>
+            ${m.type!=='builtin'
+              ? `<button class="btn btn-danger btn-sm" onclick="deleteCmd('${m.id}','${m.trigger}')">Delete</button>`
+              : `<span style="font-size:11px;color:var(--muted)">protected</span>`}
+          </td>
+        </tr>`).join('') || `<tr><td colspan="5" style="text-align:center;padding:30px;color:var(--muted)">No commands</td></tr>`;
+      } catch(e) { console.error(e); }
+    }
+
+    async function deleteCmd(id, trigger) {
+      if (!confirm(`Delete command "${trigger}"?`)) return;
+      try {
+        await API.memory.delete(id);
+        showToast(`Command "${trigger}" deleted.`);
+        loadMemory(); loadOverview();
+      } catch(e) { showToast(e.message, 'error'); }
+    }
+
+    function openAddCmd() {
+      ['cTrigger','cKeywords','cResponse'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('cType').value = 'custom';
+      clearAlert(document.getElementById('addCmdAlert'));
+      document.getElementById('addCmdOverlay').classList.add('open');
+    }
+
+    document.getElementById('addCmdSubmit').addEventListener('click', async () => {
+      const trigger  = document.getElementById('cTrigger').value.trim();
+      const keywords = document.getElementById('cKeywords').value.trim();
+      const response = document.getElementById('cResponse').value.trim();
+      const type     = document.getElementById('cType').value;
+      const alertEl  = document.getElementById('addCmdAlert');
+      clearAlert(alertEl);
+      if (!trigger || !keywords || !response) { setAlert(alertEl, 'All fields are required.'); return; }
+      try {
+        await API.memory.add({ trigger, keywords, response, type, label: type==='custom'?'admin-added':null });
+        document.getElementById('addCmdOverlay').classList.remove('open');
+        showToast(`Command "${trigger}" saved.`);
+        loadMemory(); loadOverview();
+      } catch(e) { setAlert(alertEl, e.message); }
+    });
+
+    // ── LOGS ──
+    async function loadLogs() {
+      try {
+        const logs = await API.admin.logs(200);
+        const tbody = document.getElementById('logsTable');
+        tbody.innerHTML = logs.map(l => `<tr>
+          <td><div class="flex items-center gap-2"><div class="log-dot ${logDotClass(l.action)}"></div><span style="font-size:12px;font-weight:500;color:var(--text)">${l.action.replace(/_/g,' ')}</span></div></td>
+          <td style="font-size:12px;color:var(--text-2)">${l.username}</td>
+          <td style="font-size:12px;color:var(--muted)">${l.detail||'—'}</td>
+          <td style="font-size:11px;color:var(--muted);white-space:nowrap">${formatTime(l.timestamp)}</td>
+        </tr>`).join('') || `<tr><td colspan="4" style="text-align:center;padding:30px;color:var(--muted)">No logs yet</td></tr>`;
+      } catch(e) { console.error(e); }
+    }
+
+    // ── SETTINGS ──
+    let currentSettings = {};
+    async function loadSettings() {
+      try {
+        currentSettings = await API.admin.getSettings();
+        const form = document.getElementById('settingsForm');
+        form.innerHTML = `
+          <div class="field">
+            <label>App Name</label>
+            <input type="text" id="sAppName" class="input" value="${currentSettings.app_name||''}" placeholder="CUE" />
+          </div>
+          <div class="field">
+            <label>Tagline</label>
+            <input type="text" id="sTagline" class="input" value="${currentSettings.tagline||''}" />
+          </div>
+          <div class="field">
+            <label>Max Memory Entries</label>
+            <input type="number" id="sMaxMem" class="input" value="${currentSettings.max_memory_entries||500}" />
+          </div>
+          <div class="field">
+            <label>Max Log Entries</label>
+            <input type="number" id="sMaxLog" class="input" value="${currentSettings.max_log_entries||1000}" />
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <h4>Allow Registration</h4>
+              <p>Let new users create accounts</p>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="sReg" ${currentSettings.allow_registration?'checked':''} />
+              <span class="slider"></span>
+            </label>
+          </div>
+        `;
+      } catch(e) { console.error(e); }
+    }
+
+    document.getElementById('saveSettingsBtn').addEventListener('click', async () => {
+      try {
+        await API.admin.saveSettings({
+          app_name:            document.getElementById('sAppName').value.trim(),
+          tagline:             document.getElementById('sTagline').value.trim(),
+          max_memory_entries:  parseInt(document.getElementById('sMaxMem').value) || 500,
+          max_log_entries:     parseInt(document.getElementById('sMaxLog').value) || 1000,
+          allow_registration:  document.getElementById('sReg').checked
+        });
+        showToast('Settings saved.');
+      } catch(e) { showToast(e.message, 'error'); }
+    });
+
+    // Close overlays on backdrop click
+    document.querySelectorAll('.overlay').forEach(o => {
+      o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
+    });
+
+    init();
+  </script>
+</body>
+</html>

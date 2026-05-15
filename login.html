@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CUE — Sign In</title>
+  <link rel="stylesheet" href="/main.css">
+  <style>
+    body {
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      padding: 24px;
+      background: var(--bg);
+      position: relative; overflow: hidden;
+    }
+
+    /* Grid texture */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 40px 40px;
+      opacity: 0.18;
+      pointer-events: none;
+    }
+
+    /* Radial glow */
+    .glow {
+      position: fixed;
+      width: 640px; height: 640px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(232,160,32,0.055) 0%, transparent 65%);
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+
+    .container {
+      position: relative; z-index: 1;
+      width: 100%; max-width: 400px;
+      animation: fadeUp 0.4s ease both;
+    }
+
+    /* Logo */
+    .logo {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+    .logo-mark {
+      width: 52px; height: 52px;
+      border: 1px solid var(--border2);
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 14px;
+      background: var(--surface);
+      color: var(--accent-text);
+    }
+    .logo-mark svg { width: 22px; height: 22px; }
+    .logo-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 28px; font-weight: 800;
+      color: var(--bright); letter-spacing: -1px;
+      line-height: 1;
+    }
+    .logo-title span { color: var(--accent-text); }
+    .logo-sub {
+      font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--text-2); margin-top: 7px;
+    }
+
+    /* Card */
+    .auth-card {
+      background: var(--bg1);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 28px;
+      position: relative;
+      overflow: hidden;
+    }
+    .auth-card::after {
+      content: '';
+      position: absolute; top: 0; left: 25%; right: 25%; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      opacity: 0.5;
+    }
+
+    .auth-heading {
+      font-family: 'Syne', sans-serif;
+      font-size: 18px; font-weight: 700; color: var(--bright);
+      margin-bottom: 4px;
+    }
+    .auth-sub { font-size: 13px; color: var(--text-2); margin-bottom: 24px; }
+
+    .field + .field { margin-top: 16px; }
+
+    /* Password toggle */
+    .pw-wrap { position: relative; }
+    .pw-toggle {
+      position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer;
+      color: var(--muted); transition: var(--transition); padding: 4px;
+      display: flex; align-items: center;
+    }
+    .pw-toggle:hover { color: var(--text); }
+    .pw-toggle svg { width: 15px; height: 15px; }
+
+    /* Demo hint */
+    .hint {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 12px 14px;
+      margin-top: 18px;
+    }
+    .hint-label { font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-2); margin-bottom: 8px; }
+    .hint-row   { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+    .hint-username { font-size: 12px; color: var(--bright); font-weight: 500; }
+    .hint-pw       { font-size: 12px; color: var(--text-2); }
+    .hint-badge    { margin-left: auto; }
+
+    /* Link row */
+    .link-row { text-align: center; margin-top: 18px; font-size: 13px; color: var(--text-2); }
+    .link-row a { color: var(--accent-text); transition: var(--transition); }
+    .link-row a:hover { color: var(--bright); }
+
+    /* Alert spacing */
+    #alertBox { margin-bottom: 16px; }
+  </style>
+</head>
+<body>
+  <div class="glow"></div>
+
+  <div class="container">
+    <div class="logo">
+      <div class="logo-mark">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+        </svg>
+      </div>
+      <div class="logo-title">C<span>UE</span></div>
+      <div class="logo-sub">Command Understanding Engine</div>
+    </div>
+
+    <div class="auth-card">
+      <div class="auth-heading">Sign in</div>
+      <div class="auth-sub">Access your CUE workspace</div>
+
+      <div id="alertBox" class="alert"></div>
+
+      <div class="field">
+        <label for="username">Username</label>
+        <div class="input-wrap">
+          <span class="input-icon" id="userIcon"></span>
+          <input id="username" type="text" class="input has-icon" placeholder="your_username" autocomplete="username" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="password">Password</label>
+        <div class="pw-wrap input-wrap">
+          <span class="input-icon" id="lockIcon"></span>
+          <input id="password" type="password" class="input has-icon" style="padding-right:42px" placeholder="••••••••" autocomplete="current-password" />
+          <button class="pw-toggle" id="pwToggle" type="button" aria-label="Toggle password"></button>
+        </div>
+      </div>
+
+      <button class="btn btn-primary btn-full mt-3" id="loginBtn" type="button">Sign In</button>
+
+      <div class="hint">
+        <div class="hint-label">Demo accounts</div>
+        <div class="hint-row">
+          <span class="hint-username">admin</span>
+          <span class="hint-pw">/ admin123</span>
+          <span class="badge badge-admin hint-badge">Admin</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="link-row">
+      No account yet? <a href="/signup.html">Create one</a>
+    </div>
+  </div>
+
+  <script src=" /icons.js"></script>
+  <script src=" /api.js"></script>
+  <script>
+    // Render icons
+    document.getElementById('userIcon').innerHTML = Icons.at();
+    document.getElementById('lockIcon').innerHTML = Icons.lock();
+    document.getElementById('pwToggle').innerHTML = Icons.eye();
+
+    // Redirect if already logged in
+    API.auth.me().then(me => {
+      window.location.href = me.role === 'admin' ? '/admin.html' : '/dashboard.html';
+    }).catch(() => {});
+
+    // Password toggle
+    let pwVisible = false;
+    const pwInput   = document.getElementById('password');
+    const pwToggle  = document.getElementById('pwToggle');
+    pwToggle.addEventListener('click', () => {
+      pwVisible = !pwVisible;
+      pwInput.type = pwVisible ? 'text' : 'password';
+      pwToggle.innerHTML = pwVisible ? Icons.eyeOff() : Icons.eye();
+    });
+
+    // Login
+    const alertBox = document.getElementById('alertBox');
+    const loginBtn = document.getElementById('loginBtn');
+
+    async function handleLogin() {
+      clearAlert(alertBox);
+      const username = document.getElementById('username').value.trim();
+      const password = pwInput.value;
+      if (!username || !password) { setAlert(alertBox, 'Please fill in all fields.'); return; }
+      setLoading(loginBtn, true);
+      try {
+        const data = await API.auth.login(username, password);
+        window.location.href = data.user.role === 'admin' ? '/admin.html' : '/dashboard.html';
+      } catch(e) {
+        setAlert(alertBox, e.message);
+        setLoading(loginBtn, false);
+      }
+    }
+
+    loginBtn.addEventListener('click', handleLogin);
+    document.addEventListener('keydown', e => { if (e.key === 'Enter') handleLogin(); });
+  </script>
+</body>
+</html>
